@@ -48,17 +48,21 @@ export default function TeamDetailPage() {
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Cars */}
-                <div>
-                    <h2 className="text-2xl font-semibold mb-3">Cars</h2>
-                    <div className="space-y-3">
-                        {cars.map((car) => (
-                            <div key={car.id} className="bg-gray-800 p-4 rounded-lg shadow flex justify-between">
+                <div className="space-y-3">
+                    {cars.map((car) => (
+                        <div key={car.id} className="bg-gray-800 p-4 rounded-lg shadow flex items-center gap-4">
+                            <img
+                                src="https://mjecrfaujbxeyczpdffs.supabase.co/storage/v1/object/public/f1//redbullcar.jpg"
+                                alt={car.model}
+                                className="w-16 h-16 object-contain"
+                            />
+                            <div className="flex justify-between flex-1">
                                 <span>{car.model}</span>
                                 <span className="text-gray-400">Year: {car.year}</span>
                             </div>
-                        ))}
-                        {cars.length === 0 && <p className="text-gray-500">No cars registered yet.</p>}
-                    </div>
+                        </div>
+                    ))}
+                    {cars.length === 0 && <p className="text-gray-500">No cars registered yet.</p>}
                 </div>
 
                 {/* Drivers */}
