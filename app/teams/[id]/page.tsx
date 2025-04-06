@@ -38,7 +38,7 @@ export default function TeamDetailPage() {
     return (
         <main className="max-w-6xl mx-auto p-6 text-white space-y-6">
             <div className="flex items-center gap-6 bg-gray-900 p-6 rounded-xl shadow-lg">
-                <img src={team.logo_url} alt={team.name} className="w-20 h-20 object-contain rounded-full" />
+                <img src="https://mjecrfaujbxeyczpdffs.supabase.co/storage/v1/object/public/f1//red-bull-racing-logo-1.jpg" alt={team.name} className="w-20 h-20 object-contain rounded-full" />
                 <div>
                     <h1 className="text-3xl font-bold">{team.name}</h1>
                     <p className="text-gray-400">Country: {team.country}</p>
@@ -67,7 +67,7 @@ export default function TeamDetailPage() {
                     <div className="grid sm:grid-cols-2 gap-4">
                         {drivers.map((driver) => (
                             <div key={driver.id} className="bg-gray-800 p-4 rounded-lg shadow text-center">
-                                <img src={driver.profile_img} alt={driver.name} className="w-16 h-16 mx-auto mb-2 rounded-full object-cover" />
+                                <img src="https://mjecrfaujbxeyczpdffs.supabase.co/storage/v1/object/public/f1//verstappen.avif" alt={driver.name} className="w-16 h-16 mx-auto mb-2 rounded-full object-cover" />
                                 <h3 className="text-lg font-bold">{driver.name}</h3>
                                 <p className="text-sm text-gray-400">{driver.nationality}</p>
                             </div>
