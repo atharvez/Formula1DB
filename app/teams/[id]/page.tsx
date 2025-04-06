@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 export default function TeamDetailPage() {
-    const { id } = useParams(); // dynamic route
+    const { id } = useParams();
     const [team, setTeam] = useState<any>(null);
     const [cars, setCars] = useState<any[]>([]);
     const [drivers, setDrivers] = useState<any[]>([]);
@@ -28,7 +28,6 @@ export default function TeamDetailPage() {
             const driverIds = driversRes.data.map((d: any) => d.id);
             const resultsRes = await supabase.from('results').select('*').in('driver_id', driverIds);
             const totalPoints = resultsRes.data?.reduce((sum: number, r: any) => sum + r.points, 0) ?? 0;
-
             setPoints(totalPoints);
         }
     }
@@ -37,43 +36,45 @@ export default function TeamDetailPage() {
 
     return (
         <main className="max-w-6xl mx-auto p-6 text-white space-y-6">
+            {/* Team Section */}
             <div className="flex items-center gap-6 bg-gray-900 p-6 rounded-xl shadow-lg">
-                <img src="https://mjecrfaujbxeyczpdffs.supabase.co/storage/v1/object/public/f1//red-bull-racing-logo-1.jpg" alt={team.name} className="w-20 h-20 object-contain rounded-full" />
+                <div className="w-20 h-20 flex items-center justify-center bg-gray-800 rounded-full">
+                    <span className="text-2xl font-bold">{team.name.charAt(0)}</span>
+                </div>
                 <div>
                     <h1 className="text-3xl font-bold">{team.name}</h1>
                     <p className="text-gray-400">Country: {team.country}</p>
-                    <p className="text-green-400 font-semibold mt-2">🏆 Points: {points} </p>
+                    <p className="text-green-400 font-semibold mt-2">🏆 Points: {points}</p>
                 </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-                {/* Cars */}
-                <div className="space-y-3">
-                    {cars.map((car) => (
-                        <div key={car.id} className="bg-gray-800 p-4 rounded-lg shadow flex items-center gap-4">
-                            <img
-                                src="https://mjecrfaujbxeyczpdffs.supabase.co/storage/v1/object/public/f1//redbullcar.jpg"
-                                alt={car.model}
-                                className="w-16 h-16 object-contain"
-                            />
-                            <div className="flex justify-between flex-1">
-                                <span>{car.model}</span>
-                                <span className="text-gray-400">Year: {car.year}</span>
+                {/* Cars Section */}
+                <div>
+                    <h2 className="text-2xl font-semibold mb-3">Cars</h2>
+                    <div className="space-y-3">
+                        {cars.map((car) => (
+                            <div key={car.id} className="bg-gray-800 p-4 rounded-lg shadow">
+                                <div className="flex justify-between">
+                                    <span className="font-medium">{car.model}</span>
+                                    <span className="text-gray-400">Year: {car.year}</span>
+                                </div>
+                                {car.engine && <p className="text-sm text-gray-400 mt-1">Engine: {car.engine}</p>}
                             </div>
-                        </div>
-                    ))}
-                    {cars.length === 0 && <p className="text-gray-500">No cars registered yet.</p>}
+                        ))}
+                        {cars.length === 0 && <p className="text-gray-500">No cars registered yet.</p>}
+                    </div>
                 </div>
 
-                {/* Drivers */}
+                {/* Drivers Section */}
                 <div>
                     <h2 className="text-2xl font-semibold mb-3">Drivers</h2>
                     <div className="grid sm:grid-cols-2 gap-4">
                         {drivers.map((driver) => (
-                            <div key={driver.id} className="bg-gray-800 p-4 rounded-lg shadow text-center">
-                                <img src="https://mjecrfaujbxeyczpdffs.supabase.co/storage/v1/object/public/f1//verstappen.avif" alt={driver.name} className="w-16 h-16 mx-auto mb-2 rounded-full object-cover" />
+                            <div key={driver.id} className="bg-gray-800 p-4 rounded-lg shadow">
                                 <h3 className="text-lg font-bold">{driver.name}</h3>
                                 <p className="text-sm text-gray-400">{driver.nationality}</p>
+                                {driver.number && <p className="text-sm text-gray-400">#{driver.number}</p>}
                             </div>
                         ))}
                         {drivers.length === 0 && <p className="text-gray-500">No drivers listed.</p>}
