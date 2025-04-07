@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function CircuitsPage() {
     const [circuits, setCircuits] = useState<any[]>([]);
-    const [form, setForm] = useState({ name: "", location: "", track_length: "" });
+    const [form, setForm] = useState({ name: "", location: "", length_km: "" });
 
     const fetchCircuits = async () => {
         const { data } = await supabase.from("circuits").select("*");
@@ -14,7 +14,7 @@ export default function CircuitsPage() {
     };
 
     const createCircuit = async () => {
-        if (!form.name || !form.location || !form.track_length) {
+        if (!form.name || !form.location || !form.length_km) {
             alert("Please fill in all fields.");
             return;
         }
@@ -26,7 +26,7 @@ export default function CircuitsPage() {
             return;
         }
 
-        setForm({ name: "", location: "", track_length: "" });
+        setForm({ name: "", location: "", length_km: "" });
         fetchCircuits();
     };
 
@@ -73,8 +73,8 @@ export default function CircuitsPage() {
                     <input
                         className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder="Track Length (km)"
-                        value={form.track_length}
-                        onChange={(e) => setForm({ ...form, track_length: e.target.value })}
+                        value={form.length_km}
+                        onChange={(e) => setForm({ ...form, length_km: e.target.value })}
                     />
                 </div>
                 <button
