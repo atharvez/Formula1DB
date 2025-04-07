@@ -1,105 +1,111 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { motion } from "framer-motion";
 
 export default function CircuitsPage() {
     const [circuits, setCircuits] = useState<any[]>([]);
-    const [name, setName] = useState('');
-    const [location, setLocation] = useState('');
-    const [gpName, setGpName] = useState('');
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [form, setForm] = useState({ name: "", location: "", track_length: "" });
+
+    const fetchCircuits = async () => {
+        const { data } = await supabase.from("circuits").select("*");
+        setCircuits(data || []);
+    };
+
+    const createCircuit = async () => {
+        if (!form.name || !form.location || !form.track_length) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        const { error } = await supabase.from("circuits").insert([form]);
+
+        if (error) {
+            alert("Error adding circuit: " + error.message);
+            return;
+        }
+
+        setForm({ name: "", location: "", track_length: "" });
+        fetchCircuits();
+    };
+
+    const deleteCircuit = async (id: string) => {
+        await supabase.from("circuits").delete().eq("id", id);
+        fetchCircuits();
+    };
 
     useEffect(() => {
         fetchCircuits();
     }, []);
 
-    async function fetchCircuits() {
-        const { data, error } = await supabase.from('circuits').select('*');
-        if (data) setCircuits(data);
-        if (error) console.error(error);
-    }
-
-    async function addOrUpdateCircuit() {
-        const payload = {
-            name,
-            location,
-            gp_name: gpName,
-        };
-
-        if (editingId) {
-            await supabase.from('circuits').update(payload).eq('id', editingId);
-        } else {
-            await supabase.from('circuits').insert(payload);
-        }
-
-        setName('');
-        setLocation('');
-        setGpName('');
-        setEditingId(null);
-        fetchCircuits();
-    }
-
-    async function deleteCircuit(id: number) {
-        await supabase.from('circuits').delete().eq('id', id);
-        fetchCircuits();
-    }
-
-    function editCircuit(circuit: any) {
-        setName(circuit.name);
-        setLocation(circuit.location);
-        setGpName(circuit.gp_name || '');
-        setEditingId(circuit.id);
-    }
-
     return (
-        <main className="p-6 max-w-5xl mx-auto text-white">
-            <h1 className="text-3xl font-bold mb-6">Circuits</h1>
+        <div className="min-h-screen bg-[url('/carbon-fiber.png')] bg-repeat text-white font-sora py-12 px-6">
+            <motion.h1
+                className="text-center text-4xl md:text-5xl font-bold text-red-500 mb-12 tracking-wider"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+            >
+                F1 CIRCUITS
+            </motion.h1>
 
-            <div className="grid sm:grid-cols-4 gap-2 mb-6">
-                <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Circuit Name"
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                />
-                <input
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Location"
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                />
-                <input
-                    value={gpName}
-                    onChange={(e) => setGpName(e.target.value)}
-                    placeholder="GP Name"
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                />
+            <motion.div
+                initial={{ opacity: 0, y: -30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="bg-black/70 backdrop-blur-md p-6 md:p-10 rounded-2xl mb-16 border border-red-600 max-w-5xl mx-auto"
+            >
+                <h2 className="text-2xl font-semibold mb-6 text-white text-center">Add New Circuit</h2>
+                <div className="grid md:grid-cols-3 gap-4">
+                    <input
+                        className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Circuit Name"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    />
+                    <input
+                        className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Location"
+                        value={form.location}
+                        onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    />
+                    <input
+                        className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Track Length (km)"
+                        value={form.track_length}
+                        onChange={(e) => setForm({ ...form, track_length: e.target.value })}
+                    />
+                </div>
                 <button
-                    onClick={addOrUpdateCircuit}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                    className="mt-6 bg-red-600 hover:bg-red-700 transition text-white px-6 py-2 rounded-full block mx-auto"
+                    onClick={createCircuit}
                 >
-                    {editingId ? 'Update' : 'Add'}
+                    ➕ Add Circuit
                 </button>
-            </div>
+            </motion.div>
 
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {circuits.map((circuit) => (
-                    <div key={circuit.id} className="bg-gray-900 p-4 rounded shadow space-y-2">
-                        <h2 className="text-xl font-semibold">{circuit.name}</h2>
-                        <p className="text-sm text-gray-400">Location: {circuit.location}</p>
-                        <p className="text-sm text-gray-400">GP: {circuit.gp_name || '—'}</p>
-                        <div className="space-x-2">
-                            <button onClick={() => editCircuit(circuit)} className="px-3 py-1 bg-blue-600 rounded">
-                                Edit
-                            </button>
-                            <button onClick={() => deleteCircuit(circuit.id)} className="px-3 py-1 bg-red-600 rounded">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {circuits.map((circuit, index) => (
+                    <motion.div
+                        key={circuit.id}
+                        className="bg-gradient-to-br from-black via-gray-900 to-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl hover:shadow-red-600 hover:-translate-y-1 transition-all duration-300"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                    >
+                        <h3 className="text-2xl font-bold text-red-500 mb-2">{circuit.name}</h3>
+                        <p className="text-gray-300">📍 Location: <span className="text-white">{circuit.location}</span></p>
+                        <p className="text-gray-300">🛣️ Track Length: <span className="text-white">{circuit.track_length} km</span></p>
+                        <button
+                            className="mt-4 text-sm bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded"
+                            onClick={() => deleteCircuit(circuit.id)}
+                        >
+                            Delete
+                        </button>
+                    </motion.div>
                 ))}
             </div>
-        </main>
+        </div>
     );
 }

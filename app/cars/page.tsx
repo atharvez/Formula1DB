@@ -1,154 +1,124 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { motion } from "framer-motion";
 
 export default function CarsPage() {
     const [cars, setCars] = useState<any[]>([]);
     const [teams, setTeams] = useState<any[]>([]);
+    const [form, setForm] = useState({ model: "", engine: "", team_id: "" });
 
-    const [model, setModel] = useState('');
-    const [year, setYear] = useState('');
-    const [engine, setEngine] = useState('');
-    const [teamId, setTeamId] = useState('');
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const fetchCars = async () => {
+        const { data } = await supabase
+            .from("cars")
+            .select("*, teams(name)");
+        setCars(data || []);
+    };
+
+    const fetchTeams = async () => {
+        const { data } = await supabase.from("teams").select("id, name");
+        setTeams(data || []);
+    };
+
+    const createCar = async () => {
+        if (!form.model || !form.engine || !form.team_id) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        const { error } = await supabase.from("cars").insert([form]);
+
+        if (error) {
+            alert("Failed to add car: " + error.message);
+            return;
+        }
+
+        setForm({ model: "", engine: "", team_id: "" });
+        fetchCars();
+    };
+
+    const deleteCar = async (id: string) => {
+        await supabase.from("cars").delete().eq("id", id);
+        fetchCars();
+    };
 
     useEffect(() => {
         fetchCars();
         fetchTeams();
     }, []);
 
-    async function fetchCars() {
-        const { data, error } = await supabase
-            .from('cars')
-            .select(`
-        id,
-        model,
-        year,
-        engine,
-        team_id,
-        teams ( name )
-      `);
-
-        if (data) setCars(data);
-        if (error) console.error('Fetch cars error:', error);
-    }
-
-    async function fetchTeams() {
-        const { data, error } = await supabase.from('teams').select('id, name');
-        if (data) setTeams(data);
-        if (error) console.error('Fetch teams error:', error);
-    }
-
-    async function addOrUpdateCar() {
-        const payload = {
-            model,
-            year: Number(year),
-            engine,
-            team_id: Number(teamId),
-        };
-
-        if (editingId) {
-            await supabase.from('cars').update(payload).eq('id', editingId);
-        } else {
-            await supabase.from('cars').insert(payload);
-        }
-
-        // Reset form
-        setModel('');
-        setYear('');
-        setEngine('');
-        setTeamId('');
-        setEditingId(null);
-
-        fetchCars();
-    }
-
-    async function deleteCar(id: number) {
-        await supabase.from('cars').delete().eq('id', id);
-        fetchCars();
-    }
-
-    function editCar(car: any) {
-        setModel(car.model);
-        setYear(car.year);
-        setEngine(car.engine);
-        setTeamId(car.team_id);
-        setEditingId(car.id);
-    }
-
     return (
-        <main className="p-6 max-w-5xl mx-auto text-white">
-            <h1 className="text-3xl font-bold mb-6">Cars</h1>
+        <div className="min-h-screen bg-[url('/carbon-fiber.png')] bg-repeat text-white font-sora py-12 px-6">
+            <motion.h1
+                className="text-center text-4xl md:text-5xl font-bold text-red-500 mb-12 tracking-wider"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
+            >
+                F1 CARS
+            </motion.h1>
 
-            {/* Form */}
-            <div className="grid sm:grid-cols-5 gap-2 mb-6">
-                <input
-                    value={model}
-                    onChange={(e) => setModel(e.target.value)}
-                    placeholder="Model"
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                />
-                <input
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                    placeholder="Year"
-                    type="number"
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                />
-                <input
-                    value={engine}
-                    onChange={(e) => setEngine(e.target.value)}
-                    placeholder="Engine"
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                />
-                <select
-                    value={teamId}
-                    onChange={(e) => setTeamId(e.target.value)}
-                    className="p-2 rounded bg-gray-800 border border-gray-700"
-                >
-                    <option value="">Select Team</option>
-                    {teams.map((team) => (
-                        <option key={team.id} value={team.id}>
-                            {team.name}
-                        </option>
-                    ))}
-                </select>
+            <motion.div
+                initial={{ opacity: 0, y: -30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="bg-black/70 backdrop-blur-md p-6 md:p-10 rounded-2xl mb-16 border border-red-600 max-w-5xl mx-auto"
+            >
+                <h2 className="text-2xl font-semibold mb-6 text-white text-center">Add New Car</h2>
+                <div className="grid md:grid-cols-3 gap-4">
+                    <input
+                        className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Model"
+                        value={form.model}
+                        onChange={(e) => setForm({ ...form, model: e.target.value })}
+                    />
+                    <input
+                        className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Engine"
+                        value={form.engine}
+                        onChange={(e) => setForm({ ...form, engine: e.target.value })}
+                    />
+                    <select
+                        className="bg-gray-900 border border-gray-700 p-3 rounded text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                        value={form.team_id}
+                        onChange={(e) => setForm({ ...form, team_id: e.target.value })}
+                    >
+                        <option value="">Select Team</option>
+                        {teams.map((team) => (
+                            <option key={team.id} value={team.id}>{team.name}</option>
+                        ))}
+                    </select>
+                </div>
                 <button
-                    onClick={addOrUpdateCar}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                    className="mt-6 bg-red-600 hover:bg-red-700 transition text-white px-6 py-2 rounded-full block mx-auto"
+                    onClick={createCar}
                 >
-                    {editingId ? 'Update' : 'Add'}
+                    ➕ Add Car
                 </button>
-            </div>
+            </motion.div>
 
-            {/* Cars List */}
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {cars.map((car) => (
-                    <div key={car.id} className="bg-gray-900 p-4 rounded shadow space-y-2">
-                        <h2 className="text-xl font-semibold">{car.model}</h2>
-                        <p className="text-sm text-gray-400">Year: {car.year}</p>
-                        <p className="text-sm text-gray-400">Engine: {car.engine}</p>
-                        <p className="text-sm text-gray-400">
-                            Team: {car.teams?.name || 'Unknown'}
-                        </p>
-                        <div className="space-x-2">
-                            <button
-                                onClick={() => editCar(car)}
-                                className="px-3 py-1 bg-blue-600 rounded"
-                            >
-                                Edit
-                            </button>
-                            <button
-                                onClick={() => deleteCar(car.id)}
-                                className="px-3 py-1 bg-red-600 rounded"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {cars.map((car, i) => (
+                    <motion.div
+                        key={car.id}
+                        className="bg-gradient-to-br from-black via-gray-900 to-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl hover:shadow-red-600 hover:-translate-y-1 transition-all duration-300"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                    >
+                        <h2 className="text-2xl font-bold text-red-500 mb-1">{car.model}</h2>
+                        <p className="text-gray-400">Engine: <span className="text-white">{car.engine}</span></p>
+                        <p className="text-gray-400">Team: <span className="text-white">{car.teams?.name || "N/A"}</span></p>
+                        <button
+                            className="mt-4 text-sm bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded"
+                            onClick={() => deleteCar(car.id)}
+                        >
+                            Delete
+                        </button>
+                    </motion.div>
                 ))}
             </div>
-        </main>
+        </div>
     );
 }
