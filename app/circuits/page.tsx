@@ -96,7 +96,7 @@ export default function CircuitsPage() {
                     >
                         <h3 className="text-2xl font-bold text-red-500 mb-2">{circuit.name}</h3>
                         <p className="text-gray-300">📍 Location: <span className="text-white">{circuit.location}</span></p>
-                        <p className="text-gray-300">🛣️ Track Length: <span className="text-white">{circuit.track_length} km</span></p>
+                        <p className="text-gray-300">🛣️ Track Length: <span className="text-white">{circuit.length_km} km</span></p>
                         <button
                             className="mt-4 text-sm bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded"
                             onClick={() => deleteCircuit(circuit.id)}
